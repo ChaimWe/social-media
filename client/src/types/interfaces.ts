@@ -2,8 +2,14 @@ export interface User{
   id: string;
   name: string;
   email: string;
+  bio: string;
+  profileImage: string;
+  followers: string[];
+  following: string[];
+  posts: Post[];
 };
 export interface Comment {
+  _id?: string;
   user: { id: string; name: string };
   text: string;
   createdAt: string;

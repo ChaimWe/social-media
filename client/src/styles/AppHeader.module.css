@@ -1,0 +1,64 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 40px;
+  background: #0e1a2b;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  position: sticky;
+  top: 10px;
+  margin: 0 20px;
+  z-index: 100;
+}
+
+.brand {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+
+.menu {
+  flex: 1;
+  margin-left: 40px;
+  background: transparent;
+  border-radius: 32px;
+}
+
+.menu :global(.ant-menu-item) {
+  padding: 6px 16px;
+  transition: background 0.2s, color 0.3s;
+}
+
+.menu :global(.ant-menu-item-selected) {
+  background: #1890ff !important;
+  color: #fff !important;
+  border-radius: 12px !important;
+}
+
+.menu :global(.ant-menu-item::after) {
+  display: none !important;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.userName {
+  color: #fff;
+  font-weight: 500;
+}
+
+.avatar {
+  background-color: #1890ff;
+}
+
+.roundedButton {
+  border-radius: 8px;
+}
+

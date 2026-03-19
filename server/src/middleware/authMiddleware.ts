@@ -9,7 +9,9 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
 
   try {
     const token = req.cookies?.token || req.headers['authorization']?.split(' ')[1];
-    if (!token) throw new AppError("Unauthorized: Token missing", 401);
+    if (!token || token === "undefined" || token === "null") {
+      throw new AppError("Unauthorized: Token missing", 401);
+    }
 
     const decoded = jwt.verify(token, JWT_SECRET) as UserPayload;
 

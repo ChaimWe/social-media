@@ -1,7 +1,6 @@
 import { api } from "./axios";
 import type { Post } from "../types/interfaces";
 
-// Fetch feed posts
 export const fetchFeedRequest = () => api.get<{ feed: Post[] }>("/posts/feed");
 
 export const createPostRequest = (data: FormData) =>
@@ -12,4 +11,7 @@ export const createPostRequest = (data: FormData) =>
 export const likePostRequest = (postId: string) => api.post(`/posts/${postId}/like`);
 
 export const addCommentRequest = (postId: string, text: string) =>
-  api.post<{ comment: any }>(`/posts/${postId}/comment`, { text });
+  api.post<{ comment: any }>(`/posts/${postId}/comment`, { content: text });
+
+export const getPostRequest = (postId: string) =>
+  api.get<{ post: Post }>(`/posts/${postId}`);

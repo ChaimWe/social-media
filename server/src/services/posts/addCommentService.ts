@@ -16,5 +16,15 @@ export async function addCommentService(userId: string, postId: string, data: Co
 
     await comment.save();
     await Post.updateOne({_id: postId}, {$push: {comments: comment._id}});
-    return comment;
+
+    const populated = await Comment.findById(comment._id).populate("author", "name profileImage");
+    if (!populated) return comment;
+
+    const author = populated.author as any;
+    return {
+      _id: populated._id,
+      user: { id: author?._id?.toString?.() ?? String(author?._id ?? ""), name: author?.name ?? "" },
+      text: populated.content,
+      createdAt: populated.createdAt,
+    };
 }

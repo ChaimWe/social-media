@@ -1,15 +1,17 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import type { Post } from "../types/interfaces";
-import { addCommentRequest, createPostRequest, fetchFeedRequest, likePostRequest } from "../api/postApi";
+import { addCommentRequest, createPostRequest, fetchFeedRequest, getPostRequest, likePostRequest } from "../api/postApi";
 import { authStore } from "./authstore";
 
 export const postStore = makeAutoObservable({
   posts: [] as Post[],
+  currentPost: null as Post | null,
 
   loadingFeed: false,
   creatingPost: false,
   likingPost: false,
   addingComment: false,
+  loadingPost: false,
 
   error: "",
 
@@ -26,6 +28,22 @@ export const postStore = makeAutoObservable({
       });
     } finally {
       runInAction(() => (this.loadingFeed = false));
+    }
+  },
+
+  async getPost(postId: string) {
+    this.loadingPost = true;
+    try {
+      const res = await getPostRequest(postId)
+      runInAction(() => {
+        this.currentPost = res.data.post;
+      })
+    } catch (err: any) {
+      runInAction(()=>{
+        this.error = err.response?.data?.message || "Failed to fetch user";
+      })
+    } finally {
+      this.loadingPost = false;
     }
   },
 

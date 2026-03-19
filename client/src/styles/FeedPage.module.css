@@ -1,0 +1,26 @@
+.container {
+  max-width: 700px;
+  margin: 30px auto;
+  padding: 0 16px;
+}
+
+.loading {
+  text-align: center;
+  margin-top: 100px;
+}
+
+.card {
+  margin-bottom: 20px;
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.coverImage {
+  max-height: 400px;
+  object-fit: cover;
+}
+

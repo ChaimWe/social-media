@@ -19,7 +19,10 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
+}));
 app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(express.json());
@@ -34,6 +37,7 @@ app.use(errorMiddleware);
 
 const PORT = process.env.PORT || 3000;
 const MongoURI = process.env.MONGO_URI || "";
+console.log("MONGO_URI: ", MongoURI)
 
 mongoose.connect(MongoURI)
   .then(() => {

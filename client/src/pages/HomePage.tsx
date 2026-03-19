@@ -1,8 +1,11 @@
 import { Card, Avatar, Button } from "antd";
 import { authStore } from "../stores/authstore";
 import { observer } from "mobx-react-lite";
+import { useNavigate } from "react-router-dom";
 
-export default observer(function HomePage(){
+export default observer(function HomePage() {
+  const navigate = useNavigate();
+  
   return (
     <div style={{ maxWidth: 800, margin: "50px auto", textAlign: "center" }}>
       <Card style={{ padding: 30 }}>
@@ -11,19 +14,27 @@ export default observer(function HomePage(){
 
         {authStore.isAuthenticated ? (
           <Card style={{ marginTop: 20 }}>
-            {/* <Avatar size={64} src={authStore.user?.profileImage} /> */}
-            <h3>{authStore.user?.name}</h3>
-            {/* <p>{authStore.user?.bio || "No bio yet"}</p> */}
-            <Button type="primary" style={{ marginTop: 10 }} href="/feed">
+            <Avatar size={64} src={authStore.user?.profileImage} />
+            <h3>Hi, {authStore.user?.name} 👋</h3>
+            <p>{authStore.user?.bio || "No bio yet"}</p>
+            <Button
+              type="primary"
+              style={{ marginTop: 10 }}
+              onClick={() => navigate("/feed")}
+            >
               Go to your feed
             </Button>
           </Card>
         ) : (
           <div style={{ marginTop: 20 }}>
-            <Button type="primary" href="/login" style={{ marginRight: 10 }}>
+            <Button
+              type="primary"
+              style={{ marginTop: 10 }}
+              onClick={() => navigate("/login")}
+            >
               Login
             </Button>
-            <Button href="/register">Register</Button>
+            <Button onClick={() => navigate("/register")}>Register</Button>
           </div>
         )}
       </Card>

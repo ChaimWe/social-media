@@ -15,11 +15,13 @@ export default observer(function AuthPage(){
   const navigate = useNavigate();
 
   const handleLogin = async (values: any) => {
+    authStore.clearError();
     await authStore.login(values.email, values.password);
     if (authStore.isAuthenticated) navigate("/feed");
   };
 
   const handleRegister = async (values: any) => {
+    authStore.clearError();
     await authStore.register({
       name: values.name,
       email: values.email,

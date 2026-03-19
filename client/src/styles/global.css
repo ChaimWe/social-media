@@ -1,0 +1,22 @@
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #f5f7fb;
+}
+
+.page-container {
+  max-width: 700px;
+  margin: 30px auto;
+  padding: 0 16px;
+}
+

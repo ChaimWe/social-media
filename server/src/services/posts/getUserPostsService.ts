@@ -1,26 +1,25 @@
 import { Post } from "../../models/PostModel";
-import { AppError } from "../../utils/appError";
 
-export default async function getPostService(postId: string) {
-  const post: any = await Post.findById(postId)
+export default async function getUserPostsService(userId: string) {
+  const posts: any[] = await Post.find({ author: userId })
+    .sort({ createdAt: -1 })
     .populate("author", "name profileImage")
     .populate({
       path: "comments",
       select: "content author createdAt",
       populate: { path: "author", select: "name" },
     });
-  if (!post) throw new AppError("Post not found", 404);
 
-  return {
+  return posts.map((post: any) => ({
     _id: post._id,
-    content: post.content,
     author: {
       id: post.author?._id?.toString?.() ?? String(post.author?._id ?? ""),
       name: post.author?.name ?? "",
       profileImage: post.author?.profileImage ?? "",
     },
-    likes: (post.likes || []).map((id: any) => id.toString()),
+    content: post.content,
     image: post.image || "",
+    likes: (post.likes || []).map((id: any) => id.toString()),
     comments: (post.comments || []).map((c: any) => ({
       _id: c._id,
       user: {
@@ -31,5 +30,6 @@ export default async function getPostService(postId: string) {
       createdAt: c.createdAt,
     })),
     createdAt: post.createdAt,
-  };
-} 
+  }));
+}
+

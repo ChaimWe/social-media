@@ -1,26 +1,41 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import type { User } from "../types/interfaces";
-import { loginRequest, logoutRequest, registerRequest } from "../api/authApi";
-export const authStore = makeAutoObservable({
-  user: null as User | null,
-  isAuthenticated: false,
-  loading: false,
-  error: "",
+import {
+  getMeRequest,
+  loginRequest,
+  logoutRequest,
+  registerRequest,
+} from "../api/authApi";
+
+class AuthStore {
+  user: User | null = null;
+  isAuthenticated = false;
+  loading = false;
+  error: string | null = null;
+
+  constructor() {
+    makeAutoObservable(this);
+  }
+
+  clearError() {
+    this.error = null;
+  }
 
   async login(email: string, password: string) {
     this.loading = true;
+    this.error = null;
+
     try {
       const res = await loginRequest(email, password);
-      if (res.data.user) {
-        runInAction(() => {
+
+      runInAction(() => {
+        if (res.data.user) {
           this.user = res.data.user;
           this.isAuthenticated = true;
-        });
-      } else {
-        runInAction(() => {
+        } else {
           this.error = "Invalid response from server";
-        });
-      }
+        }
+      });
     } catch (err: any) {
       runInAction(() => {
         this.error = err.response?.data?.message || "Login failed";
@@ -30,36 +45,78 @@ export const authStore = makeAutoObservable({
         this.loading = false;
       });
     }
-  },
+  }
 
-  async logout() {
+  async getMe() {
     try {
-      await logoutRequest();
+      const res = await getMeRequest();
+      runInAction(() => {
+        this.user = res.data.user;
+        this.isAuthenticated = true;
+      });
+    } catch {
       runInAction(() => {
         this.user = null;
         this.isAuthenticated = false;
       });
-    } catch (err: any) {
-      console.error(err);
     }
-  },
-
+  }
+  
   async register(data: { name: string; email: string; password: string }) {
     this.loading = true;
+    this.error = null;
+
     try {
       const res = await registerRequest(data);
-      if (res.data.user) {
-        runInAction(() => {
+
+      runInAction(() => {
+        if (res.data.user) {
           this.user = res.data.user;
           this.isAuthenticated = true;
-        });
-      }
+        } else {
+          this.error = "Invalid response from server";
+        }
+      });
     } catch (err: any) {
       runInAction(() => {
         this.error = err.response?.data?.message || "Registration failed";
       });
     } finally {
-      this.loading = false;
+      runInAction(() => {
+        this.loading = false;
+      });
     }
-  },
-});
+  }
+
+  async logout() {
+    try {
+      await logoutRequest();
+
+      runInAction(() => {
+        this.user = null;
+        this.isAuthenticated = false;
+      });
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  }
+}
+
+
+  //   async updateProfile(data: FormData) {
+  //     this.loading = true;
+  //     try {
+  //       const res = await updateProfileRequest(data);
+  //       runInAction(() => {
+  //         this.currentProfile = res.data.user;
+  //       });
+  //     } catch (err: any) {
+  //       runInAction(() => {
+  //         this.error = err.response?.data?.message || "Failed to update profile";
+  //       });
+  //     } finally {
+  //       runInAction(() => (this.loading = false));
+  //     }
+  //   },
+
+export const authStore = new AuthStore();
