@@ -21,5 +21,10 @@ export interface Post {
   image?: string;
   likes: string[];
   comments: Comment[];
+  commentCount: number;
   createdAt: string;
+}
+export interface ApiResponse<T = any> {
+  data: T;
+  message?: string;
 }

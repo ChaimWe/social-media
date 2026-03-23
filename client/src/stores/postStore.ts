@@ -1,11 +1,19 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import type { Post } from "../types/interfaces";
-import { addCommentRequest, createPostRequest, fetchFeedRequest, getPostRequest, likePostRequest } from "../api/postApi";
+import {
+  addCommentRequest,
+  createPostRequest,
+  deletePostRequest,
+  fetchFeedRequest,
+  getPostRequest,
+  likePostRequest,
+} from "../api/postApi";
 import { authStore } from "./authstore";
 
 export const postStore = makeAutoObservable({
   posts: [] as Post[],
   currentPost: null as Post | null,
+  postOwner: false,
 
   loadingFeed: false,
   creatingPost: false,
@@ -13,6 +21,7 @@ export const postStore = makeAutoObservable({
   addingComment: false,
   loadingPost: false,
 
+  message: "",
   error: "",
 
   async fetchFeed() {
@@ -20,7 +29,8 @@ export const postStore = makeAutoObservable({
     try {
       const res = await fetchFeedRequest();
       runInAction(() => {
-        this.posts = res.data.feed;
+        this.posts = res.data.data.feed;
+        this.message = res.data.message ?? "";
       });
     } catch (err: any) {
       runInAction(() => {
@@ -32,18 +42,24 @@ export const postStore = makeAutoObservable({
   },
 
   async getPost(postId: string) {
+    runInAction(() => {
+      this.currentPost = null;
+    });
     this.loadingPost = true;
     try {
-      const res = await getPostRequest(postId)
+      const res = await getPostRequest(postId);
       runInAction(() => {
-        this.currentPost = res.data.post;
-      })
+        this.currentPost = res.data.data.post;
+        this.message = res.data.message ?? "";
+      });
     } catch (err: any) {
-      runInAction(()=>{
-        this.error = err.response?.data?.message || "Failed to fetch user";
-      })
+      runInAction(() => {
+        this.error = err.response?.data?.message || "Failed to fetch post";
+      });
     } finally {
-      this.loadingPost = false;
+      runInAction(() => {
+        this.loadingPost = false;
+      });
     }
   },
 
@@ -56,7 +72,8 @@ export const postStore = makeAutoObservable({
     try {
       const res = await createPostRequest(formData);
       runInAction(() => {
-        this.posts.unshift(res.data.post); 
+        this.posts.unshift(res.data.data.post);
+        this.message = res.data.message ?? "";
       });
     } catch (err: any) {
       runInAction(() => {
@@ -72,7 +89,6 @@ export const postStore = makeAutoObservable({
     const post = this.posts.find((p) => p._id === postId);
     if (!post || !currentUserId) return;
 
-
     const prevLikes = [...post.likes];
 
     const hasLiked = post.likes.includes(currentUserId);
@@ -83,12 +99,12 @@ export const postStore = makeAutoObservable({
         : [...post.likes, currentUserId];
     });
 
-    this.likingPost = true; 
+    this.likingPost = true;
     try {
       await likePostRequest(postId);
     } catch (err) {
       console.error("Failed to update like:", err);
-      
+
       runInAction(() => {
         post.likes = prevLikes;
       });
@@ -97,19 +113,41 @@ export const postStore = makeAutoObservable({
     }
   },
 
+  async deletePost(postId: string) {
+    try {
+      const res = await deletePostRequest(postId);
+      runInAction(() => {
+        this.posts = this.posts.filter((post) => post._id !== postId);
+        this.message = res.data.message ?? "";
+      });
+    } catch (err: any) {
+      console.error(err);
+      runInAction(() => {
+        this.error = "Failed to delete post";
+      });
+    }
+  },
+
   async addComment(postId: string, text: string) {
     if (!text.trim()) return;
 
-    this.addingComment = true; 
+    this.addingComment = true;
     try {
       const res = await addCommentRequest(postId, text);
       runInAction(() => {
         const post = this.posts.find((p) => p._id === postId);
-        if (post) post.comments.push(res.data.comment);
+        if (post) {
+          post.commentCount = (post.commentCount ?? 0) + 1;
+        }
+        if (this.currentPost?._id === postId) {
+          this.currentPost.comments.push(res.data.data.comment);
+          this.message = res.data.message ?? "";
+          this.currentPost.commentCount = this.currentPost.comments.length;
+        }
       });
     } catch (err: any) {
       runInAction(() => {
-        this.error = err.response?.data?.message || "Failed to add comment"; 
+        this.error = err.response?.data?.message || "Failed to add comment";
       });
       console.error("Failed to add comment:", err);
     } finally {

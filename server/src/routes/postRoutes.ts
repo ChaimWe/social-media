@@ -6,6 +6,7 @@ import getFeed from '../controllers/posts/getFeed';
 import getPost from '../controllers/posts/getPost';
 import likePost from '../controllers/posts/likePost';
 import deletePost from '../controllers/posts/deletePost';
+import getPostImage from '../controllers/posts/getPostImage';
 import { upload } from '../middleware/multerMiddleware';
 
 const postRoutes = express.Router();
@@ -13,6 +14,8 @@ const postRoutes = express.Router();
 postRoutes.post("/", authenticateToken, upload.single("image"), creatPost);
 
 postRoutes.get("/feed", authenticateToken, getFeed);
+
+postRoutes.get("/:postId/image", getPostImage);
 
 postRoutes.get("/:postId", getPost);
 

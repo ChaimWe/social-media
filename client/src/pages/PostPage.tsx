@@ -1,55 +1,112 @@
-import { Button, Card, Form, Input, Spin } from "antd";
+import {
+  Button,
+  Card,
+  Form,
+  Input,
+  Spin,
+  Typography,
+  Avatar,
+  Divider,
+} from "antd";
 import { observer } from "mobx-react-lite";
 import { postStore } from "../stores/postStore";
-import { useParams } from "react-router-dom";
+import { authStore } from "../stores/authstore";
+import { Link, useParams } from "react-router-dom";
 import { useEffect } from "react";
+import styles from "../styles/PostPage.module.css";
+
+const { Title, Text } = Typography;
 
 export default observer(function PostPage() {
-  const {postId} = useParams<{postId: string}>();
-  if(!postId) return <p>No post selected</p>;
+  const { postId } = useParams<{ postId: string }>();
+  if (!postId) return <p>No post selected</p>;
 
-  useEffect(()=>{
-    if(postId) postStore.getPost(postId)
-  },[postId])
+  useEffect(() => {
+    postStore.getPost(postId);
+  }, [postId]);
 
-  if(postStore.loadingPost) return <Spin size="large"/>
+  if (postStore.loadingPost)
+    return (
+      <Spin size="large" style={{ display: "block", margin: "100px auto" }} />
+    );
+
   const post = postStore.currentPost;
-  if (!post) return <p>No post selected</p>
+  if (!post) return <p>Post not found</p>;
+
+  const isOwner =
+    authStore.isAuthenticated && authStore.user?.id === post.author.id;
 
   return (
-    <div style={{ maxWidth: 700, margin: "30px auto" }}>
-      <Card title={post.author.name}>
-        {post.image ? (
-          <img
-            src={post.image}
-            alt="post"
-            style={{ width: "100%", maxHeight: 500, objectFit: "cover", marginBottom: 12 }}
-          />
-        ) : null}
-        <p>{post.content}</p>
+    <div style={{ maxWidth: 700, margin: "40px auto" }}>
+      <Card>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <Avatar size={48} src={post.author.profileImage} />
+          <div>
+            <Title level={5} style={{ margin: 0 }}>
+              {post.author.name}
+            </Title>
+            <Text type="secondary">Post</Text>
+          </div>
+        </div>
 
-        <div style={{ marginTop: 16 }}>
+        <Divider />
+
+        <Text style={{ fontSize: 16 }}>{post.content}</Text>
+
+        {post.image && (
+          <img src={post.image} alt="" className={styles.picture} />
+        )}
+
+        {isOwner && (
+          <div style={{ marginTop: 16 }}>
+            <Button danger onClick={()=> postStore.deletePost(post._id)}>Delete</Button>
+          </div>
+        )}
+
+        <Divider />
+
+        <Title level={5}>Comments:</Title>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {post.comments.map((comment) => (
-            <div key={comment._id} style={{ marginBottom: 8 }}>
-              <b>{comment.user.name}:</b> {comment.text}
-            </div>
+            <Card key={comment._id} size="small">
+              <div style={{ display: "flex", gap: 10 }}>
+                <div>
+                  <Text strong>{comment.user.name}:</Text>
+                  <br />
+                  <Text>{comment.text}</Text>
+                </div>
+              </div>
+            </Card>
           ))}
         </div>
 
-        <Form
-          style={{ marginTop: 10 }}
-          onFinish={async (values: { text: string }) => {
-            await postStore.addComment(post._id, values.text);
-          }}
-        >
-          <Form.Item name="text" rules={[{ required: true, message: "Write a comment" }]}>
-            <Input placeholder="Write a comment..." />
-          </Form.Item>
+        {authStore.isAuthenticated ? (
+          <Form
+            style={{ marginTop: 16 }}
+            onFinish={async (values: { text: string }) => {
+              await postStore.addComment(post._id, values.text);
+            }}
+          >
+            <Form.Item
+              name="text"
+              rules={[{ required: true, message: "Write a comment" }]}
+            >
+              <Input.TextArea
+                placeholder="Write a comment..."
+                autoSize={{ minRows: 2, maxRows: 4 }}
+              />
+            </Form.Item>
 
-          <Button htmlType="submit" type="primary" size="small">
-            Comment
-          </Button>
-        </Form>
+            <Button htmlType="submit" type="primary">
+              Post Comment
+            </Button>
+          </Form>
+        ) : (
+          <Typography.Paragraph type="secondary" style={{ marginTop: 16 }}>
+            <Link to="/login">Log in</Link> to comment.
+          </Typography.Paragraph>
+        )}
       </Card>
     </div>
   );

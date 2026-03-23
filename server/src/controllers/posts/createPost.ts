@@ -2,6 +2,8 @@ import { Response, NextFunction } from "express";
 import type { AuthRequest } from "../../types";
 import { PostCreateService } from "../../services/posts/postCreateService";
 import { AppError } from "../../utils/appError";
+import { Post } from "../../models/PostModel";
+import { formatPostFromDoc } from "../../utils/postResponse";
 
 export default async function createPost(req: AuthRequest, res: Response, next: NextFunction) {
   try {
@@ -12,8 +14,11 @@ export default async function createPost(req: AuthRequest, res: Response, next: 
     const {content} = req.body;
     if (!content?.trim() && !image) throw new AppError("Post must have content or an image", 400);
     
-    const post = await PostCreateService(userId, { content, image });
-    res.status(201).json({ success: true, post });
+    const created = await PostCreateService(userId, { content, image });
+    const post = await Post.findById(created._id).populate("author", "name profileImage");
+    if (!post) throw new AppError("Post not found", 404);
+
+    res.status(201).json({ success: true, data: {post: formatPostFromDoc(post, { includeComments: false })} });
   } catch (error) {
     next(error);
   }

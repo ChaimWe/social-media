@@ -20,13 +20,14 @@ export const userStore = makeAutoObservable({
       const res = await fetchUserRequest(userId);
       runInAction(() => {
         this.currentProfile = res.data.user;
+        console.log(res.data.user)
       });
     } catch (err: any) {
       runInAction(() => {
         this.error = err.response?.data?.message || "Failed to fetch user";
       });
     } finally {
-      runInAction(() => (this.loading = false));
+      runInAction(() => {this.loading = false});
     }
   },
 
@@ -58,6 +59,8 @@ export const userStore = makeAutoObservable({
       });
     }
   },
+
+  
 
   async fetchAllUsers() {
     this.loading = true;

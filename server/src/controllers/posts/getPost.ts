@@ -9,7 +9,7 @@ export default async function getPost(req: Request, res: Response, next: NextFun
 
     const post = await getPostService(postId);
     
-    res.status(200).json({ success: true, post });
+    res.status(200).json({ success: true, data: { post} });
   } catch (error) {
     next(error);
   }

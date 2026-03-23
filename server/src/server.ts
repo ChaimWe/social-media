@@ -8,12 +8,7 @@ import userRoutes from './routes/userRoutes';
 import postRoutes from './routes/postRoutes';
 import authRoutes from './routes/authRoutes';
 import errorMiddleware from './middleware/errorMiddleware';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import successMessageMiddleware from './middleware/successMessageMiddleware';
 
 dotenv.config();
 
@@ -27,7 +22,7 @@ app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(express.json());
 
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use(successMessageMiddleware);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);

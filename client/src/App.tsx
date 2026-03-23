@@ -7,6 +7,8 @@ import { useEffect, type JSX } from "react";
 import AppHeader from "./components/AppHeader";
 import UsersPage from "./pages/UsersPage";
 import UserProfilePage from "./pages/ProfilePage";
+import PostPage from "./pages/PostPage";
+import MessageBanner from "./components/MessageBanner";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   return authStore.isAuthenticated ? children : <Navigate to="/login" />;
@@ -20,6 +22,8 @@ function App() {
   return (
     <>
       <AppHeader />
+      <br/>
+      <MessageBanner/>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route
@@ -41,7 +45,7 @@ function App() {
         <Route path="/login" element={<AuthPage />} />
         <Route path="/register" element={<AuthPage />} />
         <Route path="/users/:userId" element={<UserProfilePage />} />
-        <Route path="/posts/:postId" element={<UserProfilePage />} />
+        <Route path="/posts/:postId" element={<PostPage />} />
       </Routes>
     </>
   );

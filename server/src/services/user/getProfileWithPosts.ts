@@ -6,6 +6,8 @@ export default async function getUserProfileWithPosts(userId: string) {
     userProfileService(userId),
     getUserPostsService(userId),
   ]);
+  
+  const profile = {...user, posts: posts ?? []}
 
-  return { user, posts };
+  return profile;
 }

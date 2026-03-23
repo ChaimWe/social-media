@@ -13,7 +13,7 @@ export default async function addComment(req: AuthRequest, res: Response, next: 
 
     const newComment = await addCommentService(userId, postId, { content: normalizedContent || "" });
 
-    res.status(201).json({ success: true, comment: newComment });
+    res.status(201).json({ success: true, data: {comment: newComment} });
   } catch (error) {
     next(error);
   }

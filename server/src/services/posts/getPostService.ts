@@ -1,5 +1,6 @@
 import { Post } from "../../models/PostModel";
 import { AppError } from "../../utils/appError";
+import { formatPostFromDoc } from "../../utils/postResponse";
 
 export default async function getPostService(postId: string) {
   const post: any = await Post.findById(postId)
@@ -11,25 +12,5 @@ export default async function getPostService(postId: string) {
     });
   if (!post) throw new AppError("Post not found", 404);
 
-  return {
-    _id: post._id,
-    content: post.content,
-    author: {
-      id: post.author?._id?.toString?.() ?? String(post.author?._id ?? ""),
-      name: post.author?.name ?? "",
-      profileImage: post.author?.profileImage ?? "",
-    },
-    likes: (post.likes || []).map((id: any) => id.toString()),
-    image: post.image || "",
-    comments: (post.comments || []).map((c: any) => ({
-      _id: c._id,
-      user: {
-        id: c.author?._id?.toString?.() ?? String(c.author?._id ?? ""),
-        name: c.author?.name ?? "",
-      },
-      text: c.content,
-      createdAt: c.createdAt,
-    })),
-    createdAt: post.createdAt,
-  };
+  return formatPostFromDoc(post);
 } 

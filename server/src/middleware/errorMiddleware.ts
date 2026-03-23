@@ -8,6 +8,8 @@ export default function errorMiddleware(
   res: Response,
   next: NextFunction,
 ) {
+  // Used by `successMessageMiddleware` to avoid mutating error responses.
+  res.locals.errorHandled = true;
   console.error(err);
 
   if (err instanceof AppError) {

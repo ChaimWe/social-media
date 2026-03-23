@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { List, Card, Avatar, Button, Spin } from "antd";
+import { List, Card, Avatar, Button, Spin, Space } from "antd";
+import { Link } from "react-router-dom";
 import { postStore } from "../stores/postStore";
 import { authStore } from "../stores/authstore";
 import { FloatingCreatePost } from "../components/FloatingCreatePost";
@@ -55,12 +56,18 @@ export default observer(function FeedPage() {
             >
               <p>{post.content}</p>
 
-              <Button
-                type={hasLiked ? "primary" : "default"}
-                onClick={() => handleLike(post._id)}
-              >
-                {hasLiked ? "Liked" : "Like"} ({post.likes.length})
-              </Button>
+              <Space wrap>
+                <Button
+                  type={hasLiked ? "primary" : "default"}
+                  onClick={() => handleLike(post._id)}
+                >
+                  {hasLiked ? "Liked" : "Like"} ({post.likes.length})
+                </Button>
+                <Link to={`/posts/${post._id}`}>
+                  View post
+                  {post.commentCount > 0 ? ` (${post.commentCount} comments)` : ""}
+                </Link>
+              </Space>
             </Card>
           );
         }}

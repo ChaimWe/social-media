@@ -8,7 +8,7 @@ export default async function getFeed(req: AuthRequest, res: Response, next: Nex
     const userId = req.user?.id;
     if (!userId) throw new AppError("Unauthorized", 401);
     const feed = await feedProviderService(userId);
-    res.status(200).json({ success: true, feed });
+    res.status(200).json({ success: true, data: {feed} });
   } catch (error) {
     next(error);
   }
